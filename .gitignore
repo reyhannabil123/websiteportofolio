@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+.env.*.local
+.vercel
+*.log
+.DS_Store
+
+# Data dan gambar mode lokal (hanya untuk uji coba di komputer sendiri)
+.local-data
+public/uploads

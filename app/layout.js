@@ -1,33 +1,39 @@
+import "@fontsource-variable/newsreader";
+import "@fontsource-variable/instrument-sans";
 import "./globals.css";
-import { site } from "@/lib/site";
+import { getDb } from "@/lib/db";
 
-export const metadata = {
-  metadataBase: new URL(site.url),
-  title: `${site.name} — ${site.role}`,
-  description: site.tagline,
-  openGraph: {
-    title: `${site.name} — ${site.role}`,
-    description: site.tagline,
-    type: "website",
-  },
-};
+function siteUrl() {
+  const prod = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return new URL(prod ? `https://${prod}` : "http://localhost:3000");
+}
+
+export async function generateMetadata() {
+  const { settings: s } = await getDb();
+  const title = s.seoTitle || [s.name, s.role].filter(Boolean).join(" — ");
+  const description = s.seoDescription || s.tagline;
+  return {
+    metadataBase: siteUrl(),
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+  };
+}
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const { settings: s } = await getDb();
   return (
-    <html lang="id">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&display=swap"
-        />
-      </head>
+    <html
+      lang="id"
+      data-theme={s.theme}
+      data-font={s.fontStyle}
+      style={s.accent ? { "--accent": s.accent } : undefined}
+    >
       <body>{children}</body>
     </html>
   );
